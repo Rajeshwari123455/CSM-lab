@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error
+
+# Generate synthetic data
+np.random.seed(42)
+X = np.random.rand(100, 1) * 10  # Feature
+y = 2 * X[:, 0] + 1 + np.random.randn(100)  # Target variable
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Experiment with different values of alpha
+alpha_values = [0.01, 0.1, 1.0, 10.0]
+
+best_alpha = None
+best_model = None
+best_mse = float('inf')
+
+for alpha in alpha_values:
+    # Fit Lasso regression model
+    lasso_model = Lasso(alpha=alpha)
+    lasso_model.fit(X_train, y_train)
+
+    # Make predictions on the test set
+    y_pred = lasso_model.predict(X_test)
+
+    # Calculate Mean Squared Error (MSE)
+    mse = mean_squared_error(y_test, y_pred)
+
+    # Update best model if current alpha gives lower MSE
+    if mse < best_mse:
+        best_mse = mse
+        best_alpha = alpha
+        best_model = lasso_model
+
+# Print the best alpha and corresponding MSE
+print(f'Best Alpha: {best_alpha}')
+print(f'Best MSE: {best_mse:.4f}')
+
+# Plot the data and the best-fit line
+plt.scatter(X, y, label='Data')
+plt.plot(X, best_model.predict(X), color='red', label='Best-fit Line')
+plt.xlabel('Feature')
+plt.ylabel('Target')
+plt.title('Lasso Regression')
+plt.legend()
+plt.show()
