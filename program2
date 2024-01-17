@@ -1,0 +1,55 @@
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Function for forward stepwise selection
+def forward_stepwise_selection(X_train, X_test, y_train, y_test):
+    selected_features = []
+    all_features = set(range(X_train.shape[1]))
+
+    while all_features:
+        best_accuracy = 0
+        best_feature = None
+
+        for feature in all_features:
+            current_features = selected_features + [feature]
+
+            # Train a model with the current set of features
+            model = LogisticRegression()
+            model.fit(X_train[:, current_features], y_train)
+
+            # Make predictions on the test set
+            y_pred = model.predict(X_test[:, current_features])
+
+            # Calculate accuracy
+            accuracy = accuracy_score(y_test, y_pred)
+
+            # Update the best feature if the accuracy improves
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_feature = feature
+
+        if best_feature is not None:
+            selected_features.append(best_feature)
+            all_features.remove(best_feature)
+        else:
+            break
+
+    return selected_features
+
+# Perform forward stepwise selection
+selected_features = forward_stepwise_selection(X_train, X_test, y_train, y_test)
+
+# Display the selected features
+print("Selected Features:", selected_features)
