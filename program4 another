@@ -1,0 +1,29 @@
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder,StandardScaler
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import RepeatedKFold
+from sklearn.metrics import mean_absolute_error as mae
+
+data=pd.read_csv("/content/Iris.csv")
+x=data.iloc[:,:-1]
+y=data.iloc[:,-1]
+enc=LabelEncoder()
+y=enc.fit_transform(y)
+scaler=StandardScaler()
+x=scaler.fit_transform(x)
+errors=[]
+ridge_model=Ridge()
+kfolds=RepeatedKFold(n_splits=5,n_repeats=2,random_state=42)
+for train_indx,test_indx in kfolds.split(x):
+  print(train_indx,test_indx)
+  x_train=x[train_indx]
+  x_test=x[test_indx]
+  y_train=y[train_indx]
+  y_test=y[test_indx]
+  ridge_model.fit(x_train,y_train)
+  prediction=ridge_model.predict(x_test)
+  error=mae(y_test,prediction)
+  errors.append(error)
+avg_error=np.mean(errors)
+print(f"a={avg_error}")
